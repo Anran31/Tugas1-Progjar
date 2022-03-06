@@ -1,6 +1,8 @@
 import socketserver
 import sys
 import os
+import threading
+import socket
 
 BUFFER_SIZE = 1024
 
@@ -14,7 +16,7 @@ def get_file_path_and_size(filename):
             return file_path, file_size
         return '', 0
 
-def send_file(self, filepath, header_message):
+def send_file(socket, filepath, header_message):
         temp_file_name = 'temp_' + os.path.basename(filepath)
         with open(temp_file_name, 'wb') as file:
             file.write(bytes(header_message, 'utf-8'))
@@ -30,7 +32,7 @@ def send_file(self, filepath, header_message):
                     file_name = os.path.basename(filepath)
                     print(f'Finished sending {file_name}')
                     break
-                self.request.sendall(str(bytes_read))
+                socket.sendall(bytes_read)
             file.close()
         
         os.remove(temp_file_name)
@@ -38,49 +40,63 @@ def send_file(self, filepath, header_message):
 class MyTCPHandler(socketserver.BaseRequestHandler):
    
     def handle(self):
-        self.data = self.request.recv(1024)
-        
-        if self.data:
-            split_data = self.data.decode('utf-8').split()
-        
-            if len(split_data) > 1:
-                command, filename = split_data[0], ' '.join(split_data[1:])
-                # command : string 'unduh', filename : xxx.txt
-                if command.lower() == 'unduh':
-                    file_path, file_size = get_file_path_and_size(filename)
-                    self.request.sendall(f'{file_size}'.encode())
-                    response = self.request.recv(BUFFER_SIZE).decode('utf-8')
-                    print("cek1")
-                   
-                    if file_path and file_size:
-                        header_message = f"file-name: {filename},\nfile-size: {file_size},\n\n\n"
-                        header_size = bytes(header_message,'utf-8')
-                        self.request.sendall(bytes(str(len(header_size)),'utf-8'))
+        cur_thread = threading.current_thread()
+        while True:
+            self.data = self.request.recv(1024)
+            
+            if self.data:
+                split_data = self.data.decode('utf-8').split()
+            
+                if len(split_data) > 1:
+                    command, filename = split_data[0], ' '.join(split_data[1:])
+                    # command : string 'unduh', filename : xxx.txt
+                    if command.lower() == 'unduh':
+                        file_path, file_size = get_file_path_and_size(filename)
+                        self.request.sendall(f'{file_size}'.encode())
                         response = self.request.recv(BUFFER_SIZE).decode('utf-8')
-                        send_file(self.request, file_path, header_message)
+                        print("cek1")
+                    
+                        if file_path and file_size:
+                            header_message = f"file-name: {filename},\nfile-size: {file_size},\n\n\n"
+                            header_size = bytes(header_message,'utf-8')
+                            self.request.sendall(bytes(str(len(header_size)),'utf-8'))
+                            response = self.request.recv(BUFFER_SIZE).decode('utf-8')
+                            send_file(self.request, file_path, header_message)
+                        else:
+                            self.request.sendall(f'{filename} not found'.encode())
+                
                     else:
-                        self.request.sendall(f'{filename} not found'.encode())
-               
+                        self.request.sendall(f'Unduh file dengan mengirimkan command \'unduh <nama file>\''.encode())
                 else:
                     self.request.sendall(f'Unduh file dengan mengirimkan command \'unduh <nama file>\''.encode())
-       
-        else:
-            self.request.sendall(f'Unduh file dengan mengirimkan command \'unduh <nama file>\''.encode())
+        
+            else:
+                return
 
         # print('closing socket')                    
         # self.close()
         # socketserver.remove()
     
+class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
+    pass
 
 if __name__ == "__main__":
     HOST, PORT = "127.0.0.1", 5000
-
+    server = ThreadedTCPServer((HOST, PORT), MyTCPHandler)
     # Create the server, binding to localhost on port 9999
-    with socketserver.TCPServer((HOST, PORT), MyTCPHandler) as server:
-        # Activate the server; this will keep running until you
-        # interrupt the program with Ctrl-C
+    with server:
+
         try:
             server.serve_forever()
+            # server_thread = threading.Thread(target=server.serve_forever)
+            # ip, port = server.server_address
+            # print((ip, port))
+            # # Exit the server thread when the main thread terminates
+            # server_thread.daemon = False
+            # server_thread.start()
+        
+        # Activate the server; this will keep running until you
+        # interrupt the program with Ctrl-C
         except KeyboardInterrupt:
             print('closing socket')                    
             server.shutdown()
