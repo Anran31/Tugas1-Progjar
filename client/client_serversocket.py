@@ -2,8 +2,6 @@ import socket
 import sys
 
 HOST, PORT = "127.0.0.1", 5000
-# data = " ".join(sys.argv[1:])
-
 BUFFER_SIZE = 1024
 
 def download_file(socket ,filename, file_size, header_size):
@@ -28,9 +26,7 @@ def download_file(socket ,filename, file_size, header_size):
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
     # Connect to server and send data
     sock.connect((HOST, PORT))
-        # sock.sendall(bytes(data + "\n", "utf-8"))
-    # # Receive data from the server and shut down
-    # received = str(sock.recv(BUFFER_SIZE), "utf-8")
+       
     # flush : write everything to terminal tanpa menunggu buffer
     print('>> ',end='', flush=True)
     try:
@@ -60,7 +56,4 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
 
     except KeyboardInterrupt:
         sock.close()
-        # sys.exit(0)
-
-# print("Sent:     {}".format(data))
-# print("Received: {}".format(received))
+   

@@ -54,8 +54,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
                         file_path, file_size = get_file_path_and_size(filename)
                         self.request.sendall(f'{file_size}'.encode())
                         response = self.request.recv(BUFFER_SIZE).decode('utf-8')
-                        print("cek1")
-                    
+                        # if file exists   
                         if file_path and file_size:
                             header_message = f"file-name: {filename},\nfile-size: {file_size},\n\n\n"
                             header_size = bytes(header_message,'utf-8')
@@ -73,10 +72,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
             else:
                 return
 
-        # print('closing socket')                    
-        # self.close()
-        # socketserver.remove()
-    
+          
 class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     pass
 
@@ -88,16 +84,10 @@ if __name__ == "__main__":
 
         try:
             server.serve_forever()
-            # server_thread = threading.Thread(target=server.serve_forever)
-            # ip, port = server.server_address
-            # print((ip, port))
-            # # Exit the server thread when the main thread terminates
-            # server_thread.daemon = False
-            # server_thread.start()
-        
-        # Activate the server; this will keep running until you
-        # interrupt the program with Ctrl-C
+            # Exit the server thread when the main thread terminates and serve many requests
+                   
+        # Activate the server; this will keep running until you interrupt the program with Ctrl-C
         except KeyboardInterrupt:
             print('closing socket')                    
             server.shutdown()
-        # serve many requests
+    
