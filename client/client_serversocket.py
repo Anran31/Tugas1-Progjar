@@ -27,7 +27,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
     # Connect to server and send data
     sock.connect((HOST, PORT))
        
-    # flush : write everything to terminal tanpa menunggu buffer
+    # flush : write everything to terminal without wait for buffer
     print('>> ',end='', flush=True)
     try:
         while True:

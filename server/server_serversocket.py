@@ -8,9 +8,9 @@ BUFFER_SIZE = 1024
 
 def get_file_path_and_size(filename):
         dataset_dir_path = os.path.join(os.getcwd(), 'dataset')
-        # cwd: current working directory, concat ke folder dataset
+        # cwd: current working directory, join path cwd dengan folder dataset
         file_path = os.path.join(dataset_dir_path, filename)
-        # path ke file
+        # file_path : path file
         if os.path.exists(file_path):
             file_size = os.path.getsize(file_path)
             return file_path, file_size
