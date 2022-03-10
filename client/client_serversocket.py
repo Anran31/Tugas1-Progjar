@@ -1,7 +1,7 @@
 import socket
 import sys
 
-HOST, PORT = "127.0.0.1", 5000
+HOST, PORT = "192.168.100.58", 5000
 BUFFER_SIZE = 1024
 
 def download_file(socket ,filename, file_size, header_size):

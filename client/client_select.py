@@ -53,7 +53,7 @@ def connect(client_socket):
         sys.exit(0)
 
 if __name__ == '__main__':
-    server_address = ('127.0.0.1', 5000)
+    server_address = ('192.168.100.58', 5000)
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client_socket.connect(server_address)
     connect(client_socket)
